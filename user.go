@@ -5,22 +5,22 @@ import (
 )
 
 type User struct {
-	Id string
-	Name string
-	Title string
-	IconFarm int
+	Id         string
+	Name       string
+	Title      string
+	IconFarm   int
 	IconServer string
 }
 
 type UserRaw struct {
 	User struct {
-		Id string
+		Id       string
 		Username map[string]string
-		Stat string
+		Stat     string
 	}
 }
 
-func (client *Client) FindUser (name string) (*User, error) {
+func (client *Client) FindUser(name string) (*User, error) {
 	response, err := client.Request("urls.lookupUser", Params{
 		"url": fmt.Sprintf("http://flickr.com/photos/%s", name),
 	})
@@ -37,7 +37,7 @@ func (client *Client) FindUser (name string) (*User, error) {
 	}
 
 	return &User{
-		Id: raw.User.Id,
+		Id:   raw.User.Id,
 		Name: name,
 	}, nil
 }

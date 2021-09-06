@@ -19,6 +19,9 @@ func (client *Client) Following (userId string) ([]User, error) {
 	response, err := client.Request("contacts.getPublicList", Params{
 		"user_id": userId,
 	})
+	if err != nil {
+		return nil, err
+	}
 
 	raw := &FollowingRaw{}
 	err = Parse(response, raw)

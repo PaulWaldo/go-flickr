@@ -11,25 +11,26 @@ func TestAlbum(t *testing.T) {
 		Key: os.Getenv("FLICKR_API_KEY"),
 	}
 
-	album, err := client.Album("72157661416157179")
+	album, err := client.Album("72157617176794673")
 
 	if err != nil {
-		t.Error(err)
+		t.Errorf(err.Error())
+		t.FailNow()
 	}
 
 	fmt.Println(album.Id)
 	fmt.Println(len(album.Photos))
 
 	if len(album.Id) == 0 {
-		t.Error("album id is empty")
+		t.Errorf("album id is empty")
 	}
 
-	if len(album.Photos) != 17 {
-		t.Error(fmt.Printf("Not 17 album.Photos were returned: %d", len(album.Photos)))
+	if len(album.Photos) == 0 {
+		t.Errorf("Expected to fing photos in album, found none")
 	}
 
 	if len(album.Photos[0].Id) == 0 {
-		t.Error("First photo id is empty")
+		t.Errorf("First photo id is empty")
 	}
 
 	fmt.Println(album.Photos[0].URLs()["large"])

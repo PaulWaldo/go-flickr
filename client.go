@@ -2,8 +2,8 @@ package flickr
 
 import (
 	"fmt"
-	"net/http"
 	"io/ioutil"
+	"net/http"
 )
 
 type Params map[string]string
@@ -14,7 +14,7 @@ type Client struct {
 	Sig   string
 }
 
-func (client *Client) Request (method string, params Params) ([]byte, error) {
+func (client *Client) Request(method string, params Params) ([]byte, error) {
 	url := fmt.Sprintf("https://api.flickr.com/services/rest/?method=flickr.%s&api_key=%s&format=json&nojsoncallback=1", method, client.Key)
 
 	if len(client.Token) > 0 {

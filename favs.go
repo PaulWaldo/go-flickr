@@ -59,6 +59,9 @@ func (client *Client) Favs (userId string) ([]Fav, error) {
 	response, err := client.Request("favorites.getPublicList", Params{
 		"user_id": userId,
 	})
+	if err != nil {
+		return nil, err
+	}
 
 	raw := &FavsRaw{}
 	err = Parse(response, raw)
