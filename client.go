@@ -16,6 +16,9 @@ type Client struct {
 
 func (client *Client) Request(method string, params Params) ([]byte, error) {
 	url := fmt.Sprintf("https://api.flickr.com/services/rest/?method=flickr.%s&api_key=%s&format=json&nojsoncallback=1", method, client.Key)
+	for k,v := range params {
+		url += fmt.Sprintf("&%s=%s", k, v)
+	}
 
 	if len(client.Token) > 0 {
 		url = fmt.Sprintf("%s&auth_token=%s", url, client.Token)
