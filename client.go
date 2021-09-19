@@ -32,12 +32,12 @@ func NewClient(apiKey string, envFileName string) *Client {
 		if err != nil {
 			log.Fatalf("Error loading env file %s", envFileName)
 		}
+	} else {
+		/* Check for ./.env file */
+		godotenv.Load()
 	}
 
-	/* Check for ./.env file */
-	godotenv.Load()
-
-	if key, found := os.LookupEnv(ApiKeyEnvVar); found {
+	if key, ok := os.LookupEnv(ApiKeyEnvVar); ok {
 		return &Client{Key: key}
 	}
 
@@ -46,10 +46,6 @@ func NewClient(apiKey string, envFileName string) *Client {
 
 func (client *Client) Request(method string, params Params) ([]byte, error) {
 	url := fmt.Sprintf("https://api.flickr.com/services/rest/?method=flickr.%s&api_key=%s&format=json&nojsoncallback=1", method, client.Key)
-	for k, v := range params {
-		url += fmt.Sprintf("&%s=%s", k, v)
-	}
-
 	if len(client.Token) > 0 {
 		url = fmt.Sprintf("%s&auth_token=%s", url, client.Token)
 	}
