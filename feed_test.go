@@ -1,15 +1,12 @@
 package flickr
 
 import (
-	"os"
 	"testing"
 	"fmt"
 )
 
 func TestFeed(t *testing.T) {
-	client := &Client{
-		Key: os.Getenv("FLICKR_API_KEY"),
-	}
+	client := NewClient("", "")
 
 	photos, err := client.Feed("98269877@N00", 50)
 

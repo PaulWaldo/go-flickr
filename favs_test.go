@@ -1,15 +1,12 @@
 package flickr
 
 import (
-	"os"
-	"testing"
 	"fmt"
+	"testing"
 )
 
 func TestFavs(t *testing.T) {
-	client := &Client{
-		Key: os.Getenv("FLICKR_API_KEY"),
-	}
+	client := NewClient("", "")
 
 	favs, err := client.Favs("98269877@N00")
 

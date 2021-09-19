@@ -2,14 +2,11 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"github.com/azer/go-flickr"
 )
 
 func main() {
-	client := flickr.Client{
-		Key: os.Getenv("FLICKR_API_KEY"),
-	}
+	client := flickr.NewClient("", "")
 
 	favs, err := client.Favs("98269877@N00")
 

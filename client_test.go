@@ -2,13 +2,10 @@ package flickr
 
 import (
 	"fmt"
-	"os"
 )
 
 func ExampleRequest() {
-	client := &Client{
-		Key: os.Getenv("FLICKR_API_KEY"),
-	}
+	client := NewClient("", "")
 
 	resp, err := client.Request("people.findByUsername", Params{
 		"username": "azerbike",

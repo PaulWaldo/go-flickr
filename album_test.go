@@ -2,14 +2,11 @@ package flickr
 
 import (
 	"fmt"
-	"os"
 	"testing"
 )
 
 func TestAlbum(t *testing.T) {
-	client := &Client{
-		Key: os.Getenv("FLICKR_API_KEY"),
-	}
+	client := NewClient("", "")
 
 	album, err := client.Album("72157617176794673")
 

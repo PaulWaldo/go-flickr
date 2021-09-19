@@ -1,14 +1,11 @@
 package flickr
 
 import (
-	"os"
 	"testing"
 )
 
 func TestFollowing(t *testing.T) {
-	client := &Client{
-		Key: os.Getenv("FLICKR_API_KEY"),
-	}
+	client := NewClient("", "")
 
 	following, err := client.Following("98269877@N00")
 
