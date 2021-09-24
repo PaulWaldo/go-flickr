@@ -22,11 +22,12 @@ type RawFavedPhoto struct {
 	Id         string
 	IsFamily   int
 	IsFriend   int
-	IsPublic   int
+	License    string
 	Owner      string
 	Secret     string
 	Server     string
 	Title      string
+	IsPublic   int
 }
 
 type FavsRaw struct {
@@ -34,8 +35,8 @@ type FavsRaw struct {
 		Page    int
 		Pages   int
 		PerPage int
-		Total   int
 		Photo   []RawFavedPhoto
+		Total   int
 	}
 	Stat string
 }
@@ -45,8 +46,8 @@ type FavsRaw2 struct {
 		Page    int
 		Pages   int
 		PerPage int
-		Photo   []RawFavedPhoto 
-		Total string
+		Photo   []RawFavedPhoto
+		Total   string
 	}
 	Stat string
 }
@@ -89,7 +90,7 @@ func (client *Client) Favs(userId string) ([]Fav, error) {
 	return favs, nil
 }
 
-func DivMod(dvdn, dvsr int) (q, r int) {
+func divMod(dvdn, dvsr int) (q, r int) {
 	r = dvdn
 	for r >= dvsr {
 		q += 1
@@ -98,10 +99,12 @@ func DivMod(dvdn, dvsr int) (q, r int) {
 	return
 }
 
+const AllRightReserved = "0"
+
 func (client *Client) RandomFav(userId string) (RawFavedPhoto, error) {
 	const pageSize = 100
 	response, err := client.Request("favorites.getPublicList", Params{
-		"user_id": userId, "per_page": strconv.Itoa(pageSize),
+		"user_id": userId, "per_page": strconv.Itoa(pageSize), "extras": "license",
 	})
 	if err != nil {
 		return RawFavedPhoto{}, err
@@ -119,26 +122,37 @@ func (client *Client) RandomFav(userId string) (RawFavedPhoto, error) {
 		return RawFavedPhoto{}, err
 	}
 
-	photoNum := rand.Intn(raw.Photos.Total)
-	page, offset := DivMod(photoNum, pageSize)
-	page += 1 // Account for API pages starting at 1
-	response, err = client.Request("favorites.getPublicList", Params{
-		"user_id": userId, "per_page": strconv.Itoa(pageSize), "page": strconv.Itoa(page),
-	})
-	if err != nil {
-		return RawFavedPhoto{}, err
-	}
+	// Loop through random Favs, looking for ones which are not restricted, i.e.
+	// license value != 0 ("All Rights Reserved")
+	var page, offset int
+	isReserved := true
+	for isReserved {
+		photoNum := rand.Intn(raw.Photos.Total)
+		page, offset = divMod(photoNum, pageSize)
+		page += 1 // Account for API pages starting at 1
+		response, err = client.Request("favorites.getPublicList", Params{
+			"user_id":  userId,
+			"per_page": strconv.Itoa(pageSize),
+			"page":     strconv.Itoa(page),
+			"extras":   "license",
+		})
+		if err != nil {
+			return RawFavedPhoto{}, err
+		}
 
-	raw = &FavsRaw{}
-	err = Parse(response, raw)
-
-	if err != nil {
-		raw := &FavsRaw2{}
+		raw = &FavsRaw{}
 		err = Parse(response, raw)
-	}
 
-	if err != nil {
-		return RawFavedPhoto{}, err
+		if err != nil {
+			raw := &FavsRaw2{}
+			err = Parse(response, raw)
+		}
+
+		if err != nil {
+			return RawFavedPhoto{}, err
+		}
+
+		isReserved = raw.Photos.Photo[offset].License == AllRightReserved
 	}
 	return raw.Photos.Photo[offset], nil
 }
