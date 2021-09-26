@@ -6,12 +6,12 @@ import (
 )
 
 type FailResponse struct {
-	Stat string
-	Code int
+	Stat    string
+	Code    int
 	Message string
 }
 
-func Parse (data []byte, v interface{}) error {
+func Parse(data []byte, v interface{}) error {
 	fail := Fail(data)
 
 	if fail != nil {
@@ -33,7 +33,41 @@ func Parse (data []byte, v interface{}) error {
 	return nil
 }
 
-func Fail (data []byte) error {
+type PaginatedResult struct {
+	Page       int `json:"page"`
+	NumPages   int `json:"pages"`
+	NumPerPage int `json:"perpage"`
+	Total      int `json:"total"`
+}
+
+func ParsePaginated(data []byte, p *PaginatedResult, v interface{}) error {
+	fail := Fail(data)
+
+	if fail != nil {
+		return fail
+	}
+
+	err := json.Unmarshal(data, v)
+
+	if err != nil {
+		fail := Fail(data)
+
+		if fail != nil {
+			return fail
+		}
+
+		return err
+	}
+
+	err = json.Unmarshal(data, p)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func Fail(data []byte) error {
 	fail := &FailResponse{}
 	err := json.Unmarshal(data, fail)
 

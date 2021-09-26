@@ -73,34 +73,6 @@ type PhotoRaw struct {
 	}
 }
 
-type SizeToSuffixMap map[int]string
-
-func (client *Client) GetURL(photo *RawFavedPhoto, desiredSize int) (string, error) {
-	// # Typical usage
-	// https://live.staticflickr.com/{server-id}/{id}_{secret}_{size-suffix}.jpg
-
-	// # Unique URL format for 500px size
-	// https://live.staticflickr.com/{server-id}/{id}_{secret}.jpg
-
-	// # Originals might have a different file format extension
-	// https://live.staticflickr.com/{server-id}/{id}_{o-secret}_o.{o-format}
-
-	// # Example
-	// #   server-id: 7372
-	// #   photo-id: 12502775644
-	// #   secret: acfd415fa7
-	// #   size: w
-	// https://live.staticflickr.com/7372/12502775644_acfd415fa7_w.jpg
-
-	// sizeSuffix, err := closestSuffix(desiredSize)
-	// if err != nil {
-	// 	return "", err
-	// }
-	url := fmt.Sprintf("https://live.staticflickr.com/%s/%s_%s_%s_d.jpg",
-		photo.Server, photo.Id, photo.Secret, "w" /*sizeSuffix*/)
-	return url, nil
-}
-
 func (client *Client) GetPhoto(id int) (*Photo, error) {
 	response, err := client.Request("photos.getInfo", Params{
 		"photo_id": fmt.Sprintf("%d", id),

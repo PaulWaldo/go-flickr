@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 
 	"github.com/joho/godotenv"
 )
@@ -67,4 +68,34 @@ func (client *Client) Request(method string, params Params) ([]byte, error) {
 	defer response.Body.Close()
 
 	return ioutil.ReadAll(response.Body)
+}
+
+type PaginatedClient struct {
+	*Client
+	Page       int `json:"page"`
+	NumPages   int `json:"pages"`
+	NumPerPage int `json:"perpage"`
+	Total      int `json:"total"`
+	CurPage    int
+}
+
+// NewPaginatedClient creates a Client that provides paginated results,
+// numPerPage at a time
+func NewPaginatedClient(apiKey string, envFileName string, numPerPage, page int) *PaginatedClient {
+	p := &PaginatedClient{}
+	p.Client = NewClient(apiKey, envFileName)
+	p.NumPerPage = numPerPage
+	p.Page = page
+	return p
+}
+
+// NewDefaultPaginatedClient creates a PaginatedClient providing pages of 100 items starting at page 1
+func NewDefaultPaginatedClient(apiKey string, envFileName string) *PaginatedClient {
+	return NewPaginatedClient(apiKey, envFileName, 100, 1)
+}
+
+func (client *PaginatedClient) Request(method string, params Params) ([]byte, error) {
+	params["per_page"] = strconv.Itoa(client.NumPerPage)
+	params["page"] = strconv.Itoa(client.Page)
+	return client.Client.Request(method, params)
 }

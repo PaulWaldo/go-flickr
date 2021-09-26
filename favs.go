@@ -5,54 +5,62 @@ import (
 	"strconv"
 )
 
-type Fav struct {
-	Id        string
-	Title     string
-	Owner     string
-	FavedBy   string
-	DateFaved string
+// type Fav struct {
+// 	Id        string
+// 	Title     string
+// 	Owner     string
+// 	FavedBy   string
+// 	DateFaved string
+// 	Farm      int
+// 	Secret    string
+// 	Server    string
+// }
+
+type rawFavedPhoto struct {
+	DateFaved string `json:"date_faved"`
 	Farm      int
+	Id        string
+	IsFamily  int
+	IsFriend  int
+	License   string
+	Owner     string
 	Secret    string
 	Server    string
+	Title     string
+	IsPublic  int
 }
 
-type RawFavedPhoto struct {
-	Date_Faved string
-	Farm       int
-	Id         string
-	IsFamily   int
-	IsFriend   int
-	License    string
-	Owner      string
-	Secret     string
-	Server     string
-	Title      string
-	IsPublic   int
-}
-
-type FavsRaw struct {
+type favsRaw struct {
 	Photos struct {
-		Page    int
-		Pages   int
-		PerPage int
-		Photo   []RawFavedPhoto
-		Total   int
+		PaginatedResult
+		Photo []rawFavedPhoto
 	}
-	Stat string
+	// Stat string
 }
 
-type FavsRaw2 struct {
-	Photos struct {
-		Page    int
-		Pages   int
-		PerPage int
-		Photo   []RawFavedPhoto
-		Total   string
-	}
-	Stat string
+type FavsResponse struct {
+	PaginatedResult
+	Favs []rawFavedPhoto
 }
 
-func (client *Client) Favs(userId string) ([]Fav, error) {
+func responseFromRaw(raw *favsRaw) *FavsResponse {
+	resp := &FavsResponse{}
+	resp.Favs = raw.Photos.Photo
+	resp.PaginatedResult = raw.Photos.PaginatedResult
+	return resp
+}
+// type favsRaw2 struct {
+// 	Photos struct {
+// 		Page    int
+// 		Pages   int
+// 		PerPage int
+// 		Photo   []rawFavedPhoto
+// 		Total   string
+// 	}
+// 	Stat string
+// }
+
+func (client *PaginatedClient) Favs(userId string) (*FavsResponse, error) {
 	response, err := client.Request("favorites.getPublicList", Params{
 		"user_id": userId,
 	})
@@ -60,34 +68,34 @@ func (client *Client) Favs(userId string) ([]Fav, error) {
 		return nil, err
 	}
 
-	raw := &FavsRaw{}
-	err = Parse(response, raw)
-
-	if err != nil {
-		raw := &FavsRaw2{}
-		err = Parse(response, raw)
-	}
-
+	raw := &favsRaw{}
+	err = ParsePaginated(response, &raw.Photos.PaginatedResult, raw)
+	// if err != nil {
+	// 	raw := &FavsRaw2{}
+	// 	err = Parse(response, raw)
+	// }
 	if err != nil {
 		return nil, err
 	}
 
-	favs := []Fav{}
+	// favs := []Fav{}
 
-	for _, photo := range raw.Photos.Photo {
-		favs = append(favs, Fav{
-			Id:        photo.Id,
-			Title:     photo.Title,
-			Owner:     photo.Owner,
-			FavedBy:   userId,
-			DateFaved: photo.Date_Faved,
-			Farm:      photo.Farm,
-			Secret:    photo.Secret,
-			Server:    photo.Server,
-		})
-	}
+	// for _, photo := range raw.Photos.Photo {
+	// 	favs = append(favs, Fav{
+	// 		Id:        photo.Id,
+	// 		Title:     photo.Title,
+	// 		Owner:     photo.Owner,
+	// 		FavedBy:   userId,
+	// 		DateFaved: photo.Date_Faved,
+	// 		Farm:      photo.Farm,
+	// 		Secret:    photo.Secret,
+	// 		Server:    photo.Server,
+	// 	})
+	// }
 
-	return favs, nil
+	resp := responseFromRaw(raw)
+
+	return resp, nil
 }
 
 func divMod(dvdn, dvsr int) (q, r int) {
@@ -101,25 +109,25 @@ func divMod(dvdn, dvsr int) (q, r int) {
 
 const AllRightReserved = "0"
 
-func (client *Client) RandomFav(userId string) (RawFavedPhoto, error) {
+func (client *Client) RandomFav(userId string) (rawFavedPhoto, error) {
 	const pageSize = 100
 	response, err := client.Request("favorites.getPublicList", Params{
 		"user_id": userId, "per_page": strconv.Itoa(pageSize), "extras": "license",
 	})
 	if err != nil {
-		return RawFavedPhoto{}, err
+		return rawFavedPhoto{}, err
 	}
 
-	raw := &FavsRaw{}
+	raw := &favsRaw{}
 	err = Parse(response, raw)
 
-	if err != nil {
-		raw := &FavsRaw2{}
-		err = Parse(response, raw)
-	}
+	// if err != nil {
+	// 	raw := &FavsRaw2{}
+	// 	err = Parse(response, raw)
+	// }
 
 	if err != nil {
-		return RawFavedPhoto{}, err
+		return rawFavedPhoto{}, err
 	}
 
 	// Loop through random Favs, looking for ones which are not restricted, i.e.
@@ -137,19 +145,19 @@ func (client *Client) RandomFav(userId string) (RawFavedPhoto, error) {
 			"extras":   "license",
 		})
 		if err != nil {
-			return RawFavedPhoto{}, err
+			return rawFavedPhoto{}, err
 		}
 
-		raw = &FavsRaw{}
+		raw = &favsRaw{}
 		err = Parse(response, raw)
 
-		if err != nil {
-			raw := &FavsRaw2{}
-			err = Parse(response, raw)
-		}
+		// if err != nil {
+		// 	raw := &favsRaw2{}
+		// 	err = Parse(response, raw)
+		// }
 
 		if err != nil {
-			return RawFavedPhoto{}, err
+			return rawFavedPhoto{}, err
 		}
 
 		isReserved = raw.Photos.Photo[offset].License == AllRightReserved
