@@ -59,10 +59,10 @@ func ParsePaginated(data []byte, p *PaginatedResult, v interface{}) error {
 		return err
 	}
 
-	err = json.Unmarshal(data, p)
-	if err != nil {
-		return err
-	}
+	// err = json.Unmarshal(data, p)
+	// if err != nil {
+	// 	return err
+	// }
 
 	return nil
 }

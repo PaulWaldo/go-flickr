@@ -13,6 +13,6 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	} else {
-		fmt.Printf("%d Favs. First title: %s", len(favs.Favs), favs.Favs[0].Title)
+		fmt.Printf("%d Favs. First title: %s", len(favs), favs[0].Title)
 	}
 }

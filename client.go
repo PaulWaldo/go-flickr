@@ -1,6 +1,7 @@
 package flickr
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -72,30 +73,39 @@ func (client *Client) Request(method string, params Params) ([]byte, error) {
 
 type PaginatedClient struct {
 	*Client
-	Page       int `json:"page"`
-	NumPages   int `json:"pages"`
-	NumPerPage int `json:"perpage"`
-	Total      int `json:"total"`
-	CurPage    int
+	RequestPage       int
+	RequestNumPerPage int
+	Page              int `json:"page"`
+	NumPages          int `json:"pages"`
+	NumPerPage        int `json:"perpage"`
+	Total             int `json:"total"`
+	PaginationState   interface{}
 }
+
+var ErrPaginatorExhausted = errors.New("attempt to read past last page of data")
 
 // NewPaginatedClient creates a Client that provides paginated results,
 // numPerPage at a time
-func NewPaginatedClient(apiKey string, envFileName string, numPerPage, page int) *PaginatedClient {
-	p := &PaginatedClient{}
-	p.Client = NewClient(apiKey, envFileName)
-	p.NumPerPage = numPerPage
-	p.Page = page
-	return p
+func NewPaginatedClient(apiKey string, envFileName string, numPerPage, page int) PaginatedClient {
+	return PaginatedClient{
+		Client:            NewClient(apiKey, envFileName),
+		RequestNumPerPage: numPerPage,
+		RequestPage:       page,
+	}
 }
 
 // NewDefaultPaginatedClient creates a PaginatedClient providing pages of 100 items starting at page 1
-func NewDefaultPaginatedClient(apiKey string, envFileName string) *PaginatedClient {
+func NewDefaultPaginatedClient(apiKey string, envFileName string) PaginatedClient {
 	return NewPaginatedClient(apiKey, envFileName, 100, 1)
 }
 
 func (client *PaginatedClient) Request(method string, params Params) ([]byte, error) {
-	params["per_page"] = strconv.Itoa(client.NumPerPage)
-	params["page"] = strconv.Itoa(client.Page)
-	return client.Client.Request(method, params)
+	params["per_page"] = strconv.Itoa(client.RequestNumPerPage)
+	params["page"] = strconv.Itoa(client.RequestPage)
+	r, err := client.Client.Request(method, params)
+	if err == nil {
+		client.Page++
+		client.RequestPage++
+	}
+	return r, err
 }

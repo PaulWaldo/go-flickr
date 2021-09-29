@@ -1,6 +1,7 @@
 package flickr
 
 import (
+	"fmt"
 	"math/rand"
 	"strconv"
 )
@@ -38,17 +39,19 @@ type favsRaw struct {
 	// Stat string
 }
 
-type FavsResponse struct {
-	PaginatedResult
-	Favs []rawFavedPhoto
-}
+// type FavsResponse struct {
+// 	PaginatedResult
+// 	Favs []rawFavedPhoto
+// }
+type FavsResponse []rawFavedPhoto
 
-func responseFromRaw(raw *favsRaw) *FavsResponse {
-	resp := &FavsResponse{}
-	resp.Favs = raw.Photos.Photo
-	resp.PaginatedResult = raw.Photos.PaginatedResult
-	return resp
-}
+// func responseFromRaw(raw *favsRaw) *FavsResponse {
+// 	resp := &FavsResponse{}
+// 	resp = raw.Photos.Photo
+// 	resp.PaginatedResult = raw.Photos.PaginatedResult
+// 	return resp
+// }
+
 // type favsRaw2 struct {
 // 	Photos struct {
 // 		Page    int
@@ -60,7 +63,11 @@ func responseFromRaw(raw *favsRaw) *FavsResponse {
 // 	Stat string
 // }
 
-func (client *PaginatedClient) Favs(userId string) (*FavsResponse, error) {
+type paginationState struct {
+	userId string
+}
+
+func (client *PaginatedClient) Favs(userId string) (FavsResponse, error) {
 	response, err := client.Request("favorites.getPublicList", Params{
 		"user_id": userId,
 	})
@@ -70,32 +77,37 @@ func (client *PaginatedClient) Favs(userId string) (*FavsResponse, error) {
 
 	raw := &favsRaw{}
 	err = ParsePaginated(response, &raw.Photos.PaginatedResult, raw)
-	// if err != nil {
-	// 	raw := &FavsRaw2{}
-	// 	err = Parse(response, raw)
-	// }
 	if err != nil {
 		return nil, err
 	}
 
-	// favs := []Fav{}
+	// formatted := responseFromRaw(raw)
+	client.PaginationState = paginationState{
+		userId: userId,
+	}
+	client.NumPages = raw.Photos.NumPages
+	client.Total = raw.Photos.Total
+	client.Page = raw.Photos.Page
+	client.NumPerPage = raw.Photos.NumPerPage
 
-	// for _, photo := range raw.Photos.Photo {
-	// 	favs = append(favs, Fav{
-	// 		Id:        photo.Id,
-	// 		Title:     photo.Title,
-	// 		Owner:     photo.Owner,
-	// 		FavedBy:   userId,
-	// 		DateFaved: photo.Date_Faved,
-	// 		Farm:      photo.Farm,
-	// 		Secret:    photo.Secret,
-	// 		Server:    photo.Server,
-	// 	})
-	// }
+	return raw.Photos.Photo, nil
+}
 
-	resp := responseFromRaw(raw)
+func (client *PaginatedClient) NextPage() (FavsResponse, error) {
+	if client.RequestPage > client.NumPages {
+		return nil, ErrPaginatorExhausted
+	}
 
-	return resp, nil
+	state, ok := client.PaginationState.(paginationState)
+	if !ok {
+		return nil, fmt.Errorf("PaginationState is wrong type: %v", state)
+	}
+
+	favs, err := client.Favs(state.userId)
+	if err != nil {
+		return nil, fmt.Errorf("error getting Favs: %s", err)
+	}
+	return favs, nil
 }
 
 func divMod(dvdn, dvsr int) (q, r int) {
