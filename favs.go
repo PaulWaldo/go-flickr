@@ -2,8 +2,6 @@ package flickr
 
 import (
 	"fmt"
-	"math/rand"
-	"strconv"
 )
 
 type Fav struct {
@@ -34,6 +32,7 @@ type paginationState struct {
 func (client *PaginatedClient) Favs(userId string) ([]Fav, error) {
 	response, err := client.Request("favorites.getPublicList", Params{
 		"user_id": userId,
+		"extras":  "license",
 	})
 	if err != nil {
 		return nil, err
@@ -57,6 +56,7 @@ func (client *PaginatedClient) Favs(userId string) ([]Fav, error) {
 }
 
 func (client *PaginatedClient) NextPage() ([]Fav, error) {
+	client.RequestPage++
 	if client.RequestPage > client.NumPages {
 		return nil, ErrPaginatorExhausted
 	}

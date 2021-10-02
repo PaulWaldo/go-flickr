@@ -27,8 +27,8 @@ func TestFavPagination(t *testing.T) {
 		if err != nil {
 			t.Fatalf("error getting Favs page %d of %d: %s", i, client.NumPages, err)
 		}
-		if client.Page != i + 1 {
-			t.Fatalf("expecting returned page to be %d but got %d", i + 1, client.Page)
+		if client.Page != i+1 {
+			t.Fatalf("expecting returned page to be %d but got %d", i+1, client.Page)
 		}
 		if len(favs) < 1 {
 			t.Fatalf("expecting at least 1 fav, got %d", len(favs))
@@ -36,7 +36,7 @@ func TestFavPagination(t *testing.T) {
 	}
 
 	// Read last page
-	client.RequestPage = client.NumPages
+	client.RequestPage = client.NumPages - 1
 	_, err = client.NextPage()
 	if err != nil {
 		t.Fatalf("error getting Favs page %d of %d: %s", client.Page, client.NumPages, err)
