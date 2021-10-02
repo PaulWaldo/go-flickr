@@ -102,7 +102,7 @@ func NewPaginatedClient(apiKey string, envFileName string, numPerPage, page int,
 
 // NewDefaultPaginatedClient creates a PaginatedClient providing pages of 100 items starting at page 1
 func NewDefaultPaginatedClient(apiKey string, envFileName string) PaginatedClient {
-	return NewPaginatedClient(apiKey, envFileName, 100, 1, false)
+	return NewPaginatedClient(apiKey, envFileName, 100, 1, true)
 }
 
 func (client *PaginatedClient) Request(method string, params Params) ([]byte, error) {
