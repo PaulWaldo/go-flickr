@@ -61,9 +61,11 @@ func (client *Client) Request(method string, params Params) ([]byte, error) {
 	}
 
 	response, err := http.Get(url)
-
 	if err != nil {
 		return nil, err
+	}
+	if response.StatusCode < http.StatusOK || response.StatusCode > http.StatusPermanentRedirect {
+		return nil, fmt.Errorf("http status %s", response.Status)
 	}
 
 	defer response.Body.Close()
@@ -80,32 +82,38 @@ type PaginatedClient struct {
 	NumPerPage        int `json:"perpage"`
 	Total             int `json:"total"`
 	PaginationState   interface{}
+	Cache             bool
+	pageCache         map[int][]byte
 }
 
 var ErrPaginatorExhausted = errors.New("attempt to read past last page of data")
 
 // NewPaginatedClient creates a Client that provides paginated results,
 // numPerPage at a time
-func NewPaginatedClient(apiKey string, envFileName string, numPerPage, page int) PaginatedClient {
+func NewPaginatedClient(apiKey string, envFileName string, numPerPage, page int, cache bool) PaginatedClient {
 	return PaginatedClient{
 		Client:            NewClient(apiKey, envFileName),
 		RequestNumPerPage: numPerPage,
 		RequestPage:       page,
+		Cache:             cache,
+		pageCache:         make(map[int][]byte),
 	}
 }
 
 // NewDefaultPaginatedClient creates a PaginatedClient providing pages of 100 items starting at page 1
 func NewDefaultPaginatedClient(apiKey string, envFileName string) PaginatedClient {
-	return NewPaginatedClient(apiKey, envFileName, 100, 1)
+	return NewPaginatedClient(apiKey, envFileName, 100, 1, false)
 }
 
 func (client *PaginatedClient) Request(method string, params Params) ([]byte, error) {
+	// Is the page in the cache?
+	if r, ok := client.pageCache[client.RequestPage]; ok {
+		return r, nil
+	}
+
 	params["per_page"] = strconv.Itoa(client.RequestNumPerPage)
 	params["page"] = strconv.Itoa(client.RequestPage)
 	r, err := client.Client.Request(method, params)
-	if err == nil {
-		client.Page++
-		client.RequestPage++
-	}
+	client.pageCache[client.RequestPage] = r
 	return r, err
 }
