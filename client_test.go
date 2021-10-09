@@ -41,6 +41,7 @@ func TestNewClientEnvFile(t *testing.T) {
 	// Write API key to file
 	expectedApiKey := "my-api-key"
 	file.WriteString(fmt.Sprintf("%s=%s", ApiKeyEnvVar, expectedApiKey))
+	file.Close()
 
 	sut := NewClient("", file.Name())
 	if sut.Key != expectedApiKey {
