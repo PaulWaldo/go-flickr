@@ -6,7 +6,7 @@ import (
 	"strconv"
 )
 
-type Photo struct {
+type PhotoInfo struct {
 	Id          int
 	Title       string
 	Description string
@@ -26,7 +26,7 @@ type Photo struct {
 	UserIcon     string
 }
 
-type PhotoRaw struct {
+type PhotoInfoRaw struct {
 	Photo struct {
 		Id           string
 		Secret       string
@@ -73,7 +73,7 @@ type PhotoRaw struct {
 	}
 }
 
-func (client *Client) GetPhoto(id int) (*Photo, error) {
+func (client *Client) GetPhotoInfo(id int) (*PhotoInfo, error) {
 	response, err := client.Request("photos.getInfo", Params{
 		"photo_id": fmt.Sprintf("%d", id),
 	})
@@ -82,7 +82,7 @@ func (client *Client) GetPhoto(id int) (*Photo, error) {
 		return nil, err
 	}
 
-	raw := &PhotoRaw{}
+	raw := &PhotoInfoRaw{}
 	err = Parse(response, raw)
 
 	if err != nil {
@@ -103,7 +103,7 @@ func (client *Client) GetPhoto(id int) (*Photo, error) {
 
 	icon := fmt.Sprintf("https://farm%d.staticflickr.com/%s/buddyicons/%s_r.jpg", raw.Photo.Owner.IconFarm, raw.Photo.Owner.IconServer, raw.Photo.Owner.NSID)
 
-	return &Photo{
+	return &PhotoInfo{
 		Id:          id,
 		Title:       raw.Photo.Title["_content"],
 		Description: raw.Photo.Description["_content"],

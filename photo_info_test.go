@@ -6,28 +6,25 @@ import (
 
 func TestGetPhoto(t *testing.T) {
 	client := NewClient("", "")
+	const photoId int = 51387563129
 
-	photo, err := client.GetPhoto(15691826511)
+	photo, err := client.GetPhotoInfo(photoId)
 
 	if err != nil {
-		t.Fatalf("Error getting phptp: %s", err)
+		t.Fatalf("Error getting photo: %s", err)
 	}
 
-	if photo.Id != 15691826511 {
+	if photo.Id != photoId {
 		t.Fatalf("Invalid photo")
 	}
 
-	if photo.Title != "driving to cusco" {
+	if photo.Title != "Sunflowers forever" {
 		t.Fatalf("Invalid photo title")
 	}
 
-	if photo.Username != "azer" {
-		t.Fatalf("Invalid user")
+	if photo.Username != "geekneck" {
+		t.Fatalf("Expecting user geekneck, got %s", photo.Username)
 	}
-
-	// if photo.UserIcon != "https://farm3.staticflickr.com/2933/buddyicons/98269877@N00_r.jpg" {
-	// 	t.Error("Invalid user icon")
-	// }
 }
 
 func TestGetPhotoGetSizes(t *testing.T) {

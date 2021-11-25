@@ -1,13 +1,11 @@
 package flickr
 
 import (
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
-	"strconv"
 
 	"github.com/joho/godotenv"
 )
@@ -73,47 +71,47 @@ func (client *Client) Request(method string, params Params) ([]byte, error) {
 	return ioutil.ReadAll(response.Body)
 }
 
-type PaginatedClient struct {
-	*Client
-	RequestPage       int
-	RequestNumPerPage int
-	Page              int `json:"page"`
-	NumPages          int `json:"pages"`
-	NumPerPage        int `json:"perpage"`
-	Total             int `json:"total"`
-	PaginationState   interface{}
-	Cache             bool
-	pageCache         map[int][]byte
-}
+// type PaginatedClient struct {
+// 	*Client
+// 	RequestPage       int
+// 	RequestNumPerPage int
+// 	Page              int `json:"page"`
+// 	NumPages          int `json:"pages"`
+// 	NumPerPage        int `json:"perpage"`
+// 	Total             int `json:"total"`
+// 	PaginationState   interface{}
+// 	Cache             bool
+// 	pageCache         map[int][]byte
+// }
 
-var ErrPaginatorExhausted = errors.New("attempt to read past last page of data")
+// var ErrPaginatorExhausted = errors.New("attempt to read past last page of data")
 
-// NewPaginatedClient creates a Client that provides paginated results,
-// numPerPage at a time
-func NewPaginatedClient(apiKey string, envFileName string, numPerPage, page int, cache bool) PaginatedClient {
-	return PaginatedClient{
-		Client:            NewClient(apiKey, envFileName),
-		RequestNumPerPage: numPerPage,
-		RequestPage:       page,
-		Cache:             cache,
-		pageCache:         make(map[int][]byte),
-	}
-}
+// // NewPaginatedClient creates a Client that provides paginated results,
+// // numPerPage at a time
+// func NewPaginatedClient(apiKey string, envFileName string, numPerPage, page int, cache bool) PaginatedClient {
+// 	return PaginatedClient{
+// 		Client:            NewClient(apiKey, envFileName),
+// 		RequestNumPerPage: numPerPage,
+// 		RequestPage:       page,
+// 		Cache:             cache,
+// 		pageCache:         make(map[int][]byte),
+// 	}
+// }
 
-// NewDefaultPaginatedClient creates a PaginatedClient providing pages of 100 items starting at page 1
-func NewDefaultPaginatedClient(apiKey string, envFileName string) PaginatedClient {
-	return NewPaginatedClient(apiKey, envFileName, 100, 1, true)
-}
+// // NewDefaultPaginatedClient creates a PaginatedClient providing pages of 100 items starting at page 1
+// func NewDefaultPaginatedClient(apiKey string, envFileName string) PaginatedClient {
+// 	return NewPaginatedClient(apiKey, envFileName, 100, 1, true)
+// }
 
-func (client *PaginatedClient) Request(method string, params Params) ([]byte, error) {
-	// Is the page in the cache?
-	if r, ok := client.pageCache[client.RequestPage]; ok {
-		return r, nil
-	}
+// func (client *PaginatedClient) Request(method string, params Params) ([]byte, error) {
+// 	// Is the page in the cache?
+// 	if r, ok := client.pageCache[client.RequestPage]; ok {
+// 		return r, nil
+// 	}
 
-	params["per_page"] = strconv.Itoa(client.RequestNumPerPage)
-	params["page"] = strconv.Itoa(client.RequestPage)
-	r, err := client.Client.Request(method, params)
-	client.pageCache[client.RequestPage] = r
-	return r, err
-}
+// 	params["per_page"] = strconv.Itoa(client.RequestNumPerPage)
+// 	params["page"] = strconv.Itoa(client.RequestPage)
+// 	r, err := client.Client.Request(method, params)
+// 	client.pageCache[client.RequestPage] = r
+// 	return r, err
+// }
