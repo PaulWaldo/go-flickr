@@ -42,6 +42,22 @@ func TestFavsPage2(t *testing.T) {
 	}
 }
 
+func TestPaginatorExhausted(t *testing.T) {
+	client := NewPhotosClient()
+	favs, err := client.Favs("98269877@N00")
+	if err != nil {
+		t.Fatalf("Error getting Favs: %s", err)
+	}
+
+	// Attempt to read past the last page
+	client.PaginationParams.Page = favs.Pages
+	_, err = client.NextPage()
+	if err != ErrPaginatorExhausted {
+		t.Fatalf("Expecting ErrPaginatorExhausted but got %v", err)
+	}
+
+}
+
 func TestNextPage(t *testing.T) {
 	client := NewPhotosClient()
 	favs, err := client.Favs("98269877@N00")

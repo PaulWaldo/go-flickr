@@ -2,6 +2,7 @@ package flickr
 
 import (
 	"encoding/json"
+	"errors"
 	"strconv"
 )
 
@@ -51,6 +52,8 @@ type paginatedResult struct {
 
 // Our data structure
 
+var ErrPaginatorExhausted = errors.New("attempt to read past last page of data")
+
 type Paginator struct {
 	Page    int `json:"page"`
 	Pages   int `json:"pages"`
@@ -80,8 +83,9 @@ type PhotoList struct {
 }
 
 type context struct {
-	method string
-	params Params
+	method     string
+	params     Params
+	totalPages int
 }
 
 type PhotosClient struct {
@@ -128,14 +132,21 @@ func (c *PhotosClient) Request(method string, params Params) (*PhotoList, error)
 		return nil, err
 	}
 
+	conv := convert(*v)
+
 	// Save current context for a potential call to NextPage
 	c.params = params
 	c.method = method
+	c.totalPages = conv.Pages
 
 	return convert(*v), nil
 }
 
 func (c *PhotosClient) NextPage() (*PhotoList, error) {
 	c.PaginationParams.Page = c.Page + 1
+	if c.PaginationParams.Page > c.context.totalPages {
+		return nil, ErrPaginatorExhausted
+	}
+
 	return c.Request(c.method, c.params)
 }
