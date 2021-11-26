@@ -5,7 +5,10 @@ import (
 )
 
 func TestFeed(t *testing.T) {
-	client := NewClient("", "")
+	client, err := NewPhotosClient()
+	if err != nil {
+		t.Fatalf("Unable to create client: %s", err)
+	}
 
 	photos, err := client.Feed("98269877@N00", 50)
 

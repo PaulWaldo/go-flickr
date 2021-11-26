@@ -5,7 +5,11 @@ import (
 )
 
 func TestGetPhoto(t *testing.T) {
-	client := NewClient("", "")
+	client, err := NewPhotosClient()
+	if err != nil {
+		t.Fatalf("Unable to create client: %s", err)
+	}
+
 	const photoId int = 51387563129
 
 	photo, err := client.GetPhotoInfo(photoId)
@@ -28,7 +32,10 @@ func TestGetPhoto(t *testing.T) {
 }
 
 func TestGetPhotoGetSizes(t *testing.T) {
-	client := NewClient("", "")
+	client, err := NewPhotosClient()
+	if err != nil {
+		t.Fatalf("Unable to create client: %s", err)
+	}
 
 	sizes, err := client.GetPhotoSizes(567229075)
 	if err != nil {

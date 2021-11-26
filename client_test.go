@@ -7,24 +7,9 @@ import (
 	"testing"
 )
 
-func ExampleRequest() {
-	client := NewClient("", "")
-
-	resp, err := client.Request("people.findByUsername", Params{
-		"username": "azerbike",
-	})
-
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	fmt.Printf("%v", string(resp))
-	// Output: {"user":{"id":"98269877@N00","nsid":"98269877@N00","username":{"_content":"azerbike"}},"stat":"ok"}
-}
-
 func TestNewClientSpecifiedApiKey(t *testing.T) {
 	expectedApiKey := "my-api-key"
-	sut := NewClient(expectedApiKey, "")
+	sut := &Client{Key: expectedApiKey}
 	if sut.Key != expectedApiKey {
 		t.Errorf("Expecting API Key '%s', but got '%s'", expectedApiKey, sut.Key)
 	}
@@ -43,7 +28,10 @@ func TestNewClientEnvFile(t *testing.T) {
 	file.WriteString(fmt.Sprintf("%s=%s", ApiKeyEnvVar, expectedApiKey))
 	file.Close()
 
-	sut := NewClient("", file.Name())
+	sut,err := NewClientEnvFile(file.Name())
+	if err != nil {
+		t.Fatalf("Unable to create client: %s", err)
+	}
 	if sut.Key != expectedApiKey {
 		t.Errorf("Expecting API Key '%s', but got '%s'", expectedApiKey, sut.Key)
 	}

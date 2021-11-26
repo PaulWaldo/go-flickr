@@ -94,18 +94,37 @@ type PhotosClient struct {
 	context
 }
 
-func NewPhotosClientFull(apiKey string, envFileName string, paginationParams PaginationParams) *PhotosClient {
-	return &PhotosClient{
-		Client:           NewClient(apiKey, envFileName),
-		PaginationParams: &paginationParams,
+func NewPhotosClientEnvVar(string, paginationParams PaginationParams) (*PhotosClient, error) {
+	client, err := NewClientEnvVar()
+	if err != nil {
+		return nil, err
 	}
+	return &PhotosClient{
+		Client:           client,
+		PaginationParams: &paginationParams,
+	}, nil
 }
 
-func NewPhotosClient() *PhotosClient {
-	return &PhotosClient{
-		Client:           NewClient("", ""),
-		PaginationParams: &PaginationParams{PerPage: 100, Page: 1},
+func NewPhotosClientEnvFile(envFileName string, paginationParams PaginationParams) (*PhotosClient, error) {
+	client, err := NewClientEnvFile(envFileName)
+	if err != nil {
+		return nil, err
 	}
+	return &PhotosClient{
+		Client:           client,
+		PaginationParams: &paginationParams,
+	}, nil
+}
+
+func NewPhotosClient() (*PhotosClient, error) {
+	client, err := NewClient()
+	if err != nil {
+		return nil, err
+	}
+	return &PhotosClient{
+		Client:           client,
+		PaginationParams: &PaginationParams{PerPage: 100, Page: 1},
+	}, nil
 }
 func convert(r photoListRaw) *PhotoList {
 	x := &PhotoList{}

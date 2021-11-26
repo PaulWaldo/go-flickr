@@ -5,7 +5,11 @@ import (
 )
 
 func TestFavsPage1(t *testing.T) {
-	client := NewPhotosClient()
+	client, err := NewPhotosClient()
+	if err != nil {
+		t.Fatalf("Unable to create client: %s", err)
+	}
+
 	favs, err := client.Favs("98269877@N00")
 	if err != nil {
 		t.Fatalf("Error getting Favs: %s", err)
@@ -27,7 +31,10 @@ func TestFavsPage1(t *testing.T) {
 }
 
 func TestFavsPage2(t *testing.T) {
-	client := NewPhotosClient()
+	client, err := NewPhotosClient()
+	if err != nil {
+		t.Fatalf("Unable to create client: %s", err)
+	}
 	client.PaginationParams.Page = 2
 	favs, err := client.Favs("98269877@N00")
 	if err != nil {
@@ -43,7 +50,10 @@ func TestFavsPage2(t *testing.T) {
 }
 
 func TestPaginatorExhausted(t *testing.T) {
-	client := NewPhotosClient()
+	client, err := NewPhotosClient()
+	if err != nil {
+		t.Fatalf("Unable to create client: %s", err)
+	}
 	favs, err := client.Favs("98269877@N00")
 	if err != nil {
 		t.Fatalf("Error getting Favs: %s", err)
@@ -59,7 +69,10 @@ func TestPaginatorExhausted(t *testing.T) {
 }
 
 func TestNextPage(t *testing.T) {
-	client := NewPhotosClient()
+	client, err := NewPhotosClient()
+	if err != nil {
+		t.Fatalf("Unable to create client: %s", err)
+	}
 	favs, err := client.Favs("98269877@N00")
 	if err != nil {
 		t.Fatalf("Error getting Favs: %s", err)
@@ -85,4 +98,3 @@ func TestNextPage(t *testing.T) {
 		t.Fatalf("Expecting total pages to be %d, but got %d", totalPages, favs.Pages)
 	}
 }
-

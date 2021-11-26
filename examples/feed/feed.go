@@ -2,12 +2,17 @@ package main
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/azer/go-flickr"
 )
 
 func main() {
-	client := flickr.NewClient("", "")
+	client,err := flickr.NewClient()
+	if err != nil {
+		fmt.Printf("Unable to create client: %s", err)
+		os.Exit(1)
+	}
 
 	feed, err := client.Feed("98269877@N00", 100)
 

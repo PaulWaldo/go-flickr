@@ -5,7 +5,10 @@ import (
 )
 
 func TestFindUser(t *testing.T) {
-	client := NewClient("", "")
+	client, err := NewPhotosClient()
+	if err != nil {
+		t.Fatalf("Unable to create client: %s", err)
+	}
 
 	user, err := client.FindUser("azer")
 

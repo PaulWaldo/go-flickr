@@ -5,7 +5,10 @@ import (
 )
 
 func TestFollowing(t *testing.T) {
-	client := NewClient("", "")
+	client, err := NewPhotosClient()
+	if err != nil {
+		t.Fatalf("Unable to create client: %s", err)
+	}
 
 	following, err := client.Following("98269877@N00")
 

@@ -6,7 +6,10 @@ import (
 )
 
 func TestAlbum(t *testing.T) {
-	client := NewClient("", "")
+	client,err := NewClient()
+	if err != nil {
+		t.Fatalf("Unable to create client: %s", err)
+	}
 
 	album, err := client.Album("72157617176794673")
 

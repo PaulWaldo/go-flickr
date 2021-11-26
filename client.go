@@ -20,15 +20,38 @@ type Client struct {
 
 const ApiKeyEnvVar = "FLICKR_API_KEY"
 
-func NewClient(apiKey string, envFileName string) *Client {
-	if apiKey != "" {
-		return &Client{Key: apiKey}
-	}
-	var err error
+// func NewClient(apiKey string, envFileName string) *Client {
+// 	if apiKey != "" {
+// 		return &Client{Key: apiKey}
+// 	}
+// 	var err error
 
+// 	/* Check specified env file */
+// 	if envFileName != "" {
+// 		err = godotenv.Load(envFileName)
+// 		if err != nil {
+// 			log.Fatalf("Error loading env file %s", envFileName)
+// 		}
+// 	} else {
+// 		/* Check for ./.env file */
+// 		godotenv.Load()
+// 	}
+
+// 	if key, ok := os.LookupEnv(ApiKeyEnvVar); ok {
+// 		return &Client{Key: key}
+// 	}
+
+// 	panic("Unable to get API Key")
+// }
+
+func NewClient() (*Client, error) {
+	return NewClientEnvFile("")
+}
+
+func NewClientEnvFile(envFileName string) (*Client, error) {
 	/* Check specified env file */
 	if envFileName != "" {
-		err = godotenv.Load(envFileName)
+		err := godotenv.Load(envFileName)
 		if err != nil {
 			log.Fatalf("Error loading env file %s", envFileName)
 		}
@@ -37,11 +60,14 @@ func NewClient(apiKey string, envFileName string) *Client {
 		godotenv.Load()
 	}
 
-	if key, ok := os.LookupEnv(ApiKeyEnvVar); ok {
-		return &Client{Key: key}
-	}
+	return NewClientEnvVar()
+}
 
-	panic("Unable to get API Key")
+func NewClientEnvVar() (*Client, error) {
+	if key, ok := os.LookupEnv(ApiKeyEnvVar); ok {
+		return &Client{Key: key}, nil
+	}
+	return nil, fmt.Errorf("API Key '%s' not found in environment", ApiKeyEnvVar)
 }
 
 func (client *Client) Request(method string, params Params) ([]byte, error) {
