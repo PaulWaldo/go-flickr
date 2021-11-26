@@ -53,10 +53,10 @@ func (client *Client) Album(id string) (*Album, error) {
 
 	info := &struct {
 		PhotoSet struct {
-			Title       struct{
+			Title struct {
 				Content string `json:"_content"`
 			} `json:"title"`
-			Description struct{
+			Description struct {
 				Content string `json:"_content"`
 			} `json:"description"`
 		} `json:"photoset"`

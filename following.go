@@ -5,17 +5,17 @@ import "fmt"
 type FollowingRaw struct {
 	Contacts struct {
 		Contact []struct {
-			IconFarm int
+			IconFarm   int
 			IconServer string
-			Ignored int
-			NSID string
+			Ignored    int
+			NSID       string
 			RevIgnored int
-			Username string
+			Username   string
 		}
 	}
 }
 
-func (client *Client) Following (userId string) ([]User, error) {
+func (client *Client) Following(userId string) ([]User, error) {
 	response, err := client.Request("contacts.getPublicList", Params{
 		"user_id": userId,
 	})
@@ -43,9 +43,9 @@ func (client *Client) Following (userId string) ([]User, error) {
 		ids[user.NSID] = true
 
 		following = append(following, User{
-			Id: user.NSID,
-			Title: user.Username,
-			IconFarm: user.IconFarm,
+			Id:         user.NSID,
+			Title:      user.Username,
+			IconFarm:   user.IconFarm,
 			IconServer: user.IconServer,
 		})
 	}

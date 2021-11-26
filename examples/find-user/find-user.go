@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	client,err := flickr.NewClient()
+	client, err := flickr.NewClient()
 	if err != nil {
 		fmt.Printf("Unable to create client: %s", err)
 		os.Exit(1)

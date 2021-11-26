@@ -6,7 +6,7 @@ import (
 )
 
 func TestAlbum(t *testing.T) {
-	client,err := NewClient()
+	client, err := NewClient()
 	if err != nil {
 		t.Fatalf("Unable to create client: %s", err)
 	}

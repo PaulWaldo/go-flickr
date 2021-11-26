@@ -28,7 +28,7 @@ func TestNewClientEnvFile(t *testing.T) {
 	file.WriteString(fmt.Sprintf("%s=%s", ApiKeyEnvVar, expectedApiKey))
 	file.Close()
 
-	sut,err := NewClientEnvFile(file.Name())
+	sut, err := NewClientEnvFile(file.Name())
 	if err != nil {
 		t.Fatalf("Unable to create client: %s", err)
 	}
