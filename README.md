@@ -43,16 +43,6 @@ user.Name
 // => azer
 ```
 
-### Favs
-
-List given user's favorites
-
-```go
-userId := "123123123"
-
-favs, err := client.Favs(userId)
-```
-
 ### Following
 
 List the people given user follows on Flickr
@@ -69,4 +59,16 @@ List photos in the album with given ID
 
 ```go
 photos, err := client.Album("72157662053417706")
+```
+
+### Favorites
+
+List photos that have been favorited by the given user ID. Note the Flickr API returns the list as paginated results.
+
+```go
+client, err := flickr.NewPhotosClient()
+favs, err := client.Favs("98269877@N00")
+if favs.Pages > 1 {
+  favs, err = client.NextPage()
+}
 ```

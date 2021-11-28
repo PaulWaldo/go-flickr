@@ -9,6 +9,7 @@ import (
 // Bool allows 0/1 to also become boolean.
 type Bool bool
 
+// UnmarshalJSON unmarshals a Bool from JSON
 // Courtesy of https://stackoverflow.com/a/56832346/1290460
 func (bit *Bool) UnmarshalJSON(b []byte) error {
 	txt := string(b)
@@ -16,10 +17,28 @@ func (bit *Bool) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
+// Server side data structures
+
+type photoListRaw struct {
+	Photos paginatedResult
+}
+
+type paginatedResult struct {
+	Page       int `json:"page"`
+	NumPages   int `json:"pages"`
+	NumPerPage int `json:"perpage"`
+	Total      int `json:"total"`
+	Photo      []PhotoListItem
+}
+
+// ErrPaginatorExhausted indicates that an attempt was made go beyond the last page of a paginated result
+var ErrPaginatorExhausted = errors.New("attempt to read past last page of data")
+
 /*
 	Paginator represent the paged data that Flickr returns when presenting photos.
 	When photos are requested, they arrive in batches (pages) with an
 	enclosing structure:
+
 	<photos page="2" pages="89" perpage="10" total="881">
 		<photo id="2636" owner="47058503995@N01"
 			secret="a123456" server="2" title="test_04"
@@ -35,25 +54,6 @@ func (bit *Bool) UnmarshalJSON(b []byte) error {
 			ispublic="1" isfriend="0" isfamily="0" />
 	</photos>
 */
-
-// Server side data structure
-
-type photoListRaw struct {
-	Photos paginatedResult
-}
-
-type paginatedResult struct {
-	Page       int `json:"page"`
-	NumPages   int `json:"pages"`
-	NumPerPage int `json:"perpage"`
-	Total      int `json:"total"`
-	Photo      []PhotoListItem
-}
-
-// Our data structure
-
-var ErrPaginatorExhausted = errors.New("attempt to read past last page of data")
-
 type Paginator struct {
 	Page    int `json:"page"`
 	Pages   int `json:"pages"`
@@ -61,11 +61,15 @@ type Paginator struct {
 	Total   int `json:"total"`
 }
 
+// PaginationParams request Flickr to return results in chunk sizes
 type PaginationParams struct {
+	// PerPage is how many results to return at one time
 	PerPage int
-	Page    int
+	// Page is the page that is being requested
+	Page int
 }
 
+// PhotoListItem is the information about a specific photo
 type PhotoListItem struct {
 	ID       string `json:"id"`
 	Owner    string
@@ -77,6 +81,7 @@ type PhotoListItem struct {
 	IsFamily Bool
 }
 
+// PhotoList is the combined response from Flickr containg the paging data as well as the list of photos
 type PhotoList struct {
 	Paginator
 	Photos []PhotoListItem
@@ -88,12 +93,15 @@ type context struct {
 	totalPages int
 }
 
+// PhotosClient is a client used to get Paginated data from Flickr
 type PhotosClient struct {
 	*Client
 	*PaginationParams
 	context
 }
 
+// NewPhotosClientEnvVar creates a paginated client that can access the Flickr API,
+// by searching for an environment variable named by ApiKeyEnvVar
 func NewPhotosClientEnvVar(string, paginationParams PaginationParams) (*PhotosClient, error) {
 	client, err := NewClientEnvVar()
 	if err != nil {
@@ -105,6 +113,9 @@ func NewPhotosClientEnvVar(string, paginationParams PaginationParams) (*PhotosCl
 	}, nil
 }
 
+// NewPhotosClientEnvFile creates a paginated client that can access the Flickr API,
+// attempting fo fetch the API Key first from an environment file specified in envFileName
+// then from the file ./.env
 func NewPhotosClientEnvFile(envFileName string, paginationParams PaginationParams) (*PhotosClient, error) {
 	client, err := NewClientEnvFile(envFileName)
 	if err != nil {
@@ -116,6 +127,8 @@ func NewPhotosClientEnvFile(envFileName string, paginationParams PaginationParam
 	}, nil
 }
 
+// NewClient creates a paginated client that can access the Flickr API,
+// attempting fo fetch the API Key from the file ./.env
 func NewPhotosClient() (*PhotosClient, error) {
 	client, err := NewClient()
 	if err != nil {
@@ -136,6 +149,9 @@ func convert(r photoListRaw) *PhotoList {
 	return x
 }
 
+// Request uses the client to call the Flickr API.
+// method is the name of the API to call.
+// params are extra values used to modify the request
 func (c *PhotosClient) Request(method string, params Params) (*PhotoList, error) {
 	params["page"] = strconv.Itoa(c.Page)
 	params["per_page"] = strconv.Itoa(c.PerPage)
@@ -161,6 +177,7 @@ func (c *PhotosClient) Request(method string, params Params) (*PhotoList, error)
 	return convert(*v), nil
 }
 
+// NextPage retreives the next page in a paginated API call
 func (c *PhotosClient) NextPage() (*PhotoList, error) {
 	c.PaginationParams.Page = c.Page + 1
 	if c.PaginationParams.Page > c.context.totalPages {

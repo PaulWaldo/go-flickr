@@ -24,7 +24,6 @@ func main() {
 
 	if favs.Pages > 1 {
 		favs, err = client.NextPage()
-		fmt.Printf("favs=%+v\n", favs)
 		if err != nil {
 			fmt.Println(err)
 		} else {
