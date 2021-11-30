@@ -79,6 +79,8 @@ type PhotoListItem struct {
 	IsPublic Bool
 	IsFriend Bool
 	IsFamily Bool
+	// Extras
+	License string
 }
 
 // PhotoList is the combined response from Flickr containg the paging data as well as the list of photos
