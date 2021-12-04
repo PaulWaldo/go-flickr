@@ -137,7 +137,7 @@ type PhotoSizes struct {
 	Sizes       []PhotoSize
 }
 
-func (ps *PhotoSizes) ClosestWidthUrl(desired int) (string, error) {
+func (ps *PhotoSizes) ClosestWidthUrl(desired, minAccepted int) (string, error) {
 	widthUrlMap := make(map[int]string)
 	for _, s := range ps.Sizes {
 		widthUrlMap[s.Width] = s.Source
@@ -150,8 +150,9 @@ func (ps *PhotoSizes) ClosestWidthUrl(desired int) (string, error) {
 	}
 	sort.Ints(keys)
 
+	difAllowed := desired - minAccepted
 	for _, v := range keys {
-		if v >= desired {
+		if v >= desired || v >= desired-difAllowed {
 			return widthUrlMap[v], nil
 		}
 	}

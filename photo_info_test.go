@@ -112,18 +112,21 @@ var photoSizeInfo = &PhotoSizes{
 func TestClosestWidthUrl(t *testing.T) {
 	cases := []struct {
 		desired     int
+		minAccepted int
 		expected    string
 		errExpected bool
 	}{
-		{1, smallUrl, false},
-		{99, smallUrl, false},
-		{100, smallUrl, false},
-		{101, mediumUrl, false},
-		{99999, largeUrl, true},
+		{1, 1, smallUrl, false},
+		{99, 99, smallUrl, false},
+		{100, 100, smallUrl, false},
+		{101, 101, mediumUrl, false},
+		{99999, 99999, largeUrl, true},
+		{101, 100, smallUrl, false},
+		{302, 302, "", true},
 	}
 
 	for _, c := range cases {
-		actual, err := photoSizeInfo.ClosestWidthUrl(c.desired)
+		actual, err := photoSizeInfo.ClosestWidthUrl(c.desired, c.minAccepted)
 		if err != nil {
 			if !c.errExpected {
 				t.Fatalf("Expecting error %v, but got %v", c.errExpected, err)
@@ -136,7 +139,7 @@ func TestClosestWidthUrl(t *testing.T) {
 			}
 		}
 		if actual != c.expected {
-			t.Fatalf("For requested size %d, Expecting url to be '%s', but got '%s'", c.desired, c.expected, actual)
+			t.Fatalf("For requested size %d, minAccepted %d, Expecting url to be '%s', but got '%s'", c.desired, c.minAccepted, c.expected, actual)
 		}
 	}
 }
