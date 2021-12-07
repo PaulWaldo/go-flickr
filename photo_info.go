@@ -1,6 +1,7 @@
 package flickr
 
 import (
+	"errors"
 	"fmt"
 	"sort"
 	"strconv"
@@ -137,6 +138,8 @@ type PhotoSizes struct {
 	Sizes       []PhotoSize
 }
 
+var ErrMinSizeNotAvailable = errors.New("minimum size not available")
+
 func (ps *PhotoSizes) ClosestWidthUrl(desired, minAccepted int) (string, error) {
 	widthUrlMap := make(map[int]string)
 	for _, s := range ps.Sizes {
@@ -157,8 +160,8 @@ func (ps *PhotoSizes) ClosestWidthUrl(desired, minAccepted int) (string, error) 
 		}
 	}
 
-	largestAvailable := keys[len(keys)-1]
-	return "", fmt.Errorf("largest size is %d, but %d requested", largestAvailable, desired)
+	// largestAvailable := keys[len(keys)-1]
+	return "", ErrMinSizeNotAvailable
 }
 
 type rawPhotoSizes struct {

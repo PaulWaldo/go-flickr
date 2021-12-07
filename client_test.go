@@ -16,6 +16,10 @@ func TestNewClientSpecifiedApiKey(t *testing.T) {
 }
 
 func TestNewClientEnvFile(t *testing.T) {
+	// Temporarily unset any API Key that is set
+	apiKey := os.Getenv(ApiKeyEnvVar)
+	os.Unsetenv(ApiKeyEnvVar)
+
 	// Create a temporary env file
 	file, err := ioutil.TempFile("", "go-test")
 	if err != nil {
@@ -29,6 +33,7 @@ func TestNewClientEnvFile(t *testing.T) {
 	file.Close()
 
 	sut, err := NewClientEnvFile(file.Name())
+	defer os.Setenv(ApiKeyEnvVar, apiKey)
 	if err != nil {
 		t.Fatalf("Unable to create client: %s", err)
 	}
