@@ -12,10 +12,13 @@ type Client struct {
 	Key   string
 	Token string
 	Sig   string
+	URL   string
 }
 
 // ApiKeyEnvVar is the name of the environment variable that is search for the Flickr API Key
 const ApiKeyEnvVar = "FLICKR_API_KEY"
+
+const flickrURL = "https://api.flickr.com/services/rest"
 
 // NewClient creates a client that can access the Flickr API,
 // attempting fo fetch the API Key from the file ./.env
@@ -31,7 +34,7 @@ func NewClientEnvFile(envFileName string) (*Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Client{Key: key}, nil
+	return &Client{Key: key, URL: flickrURL}, nil
 }
 
 // NewClientEnvFile creates a client that can access the Flickr API,
@@ -41,17 +44,17 @@ func NewClientEnvVar() (*Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Client{Key: key}, nil
+	return &Client{Key: key, URL: flickrURL}, nil
 }
 
-func (client *Client) Request(method string, params Params) ([]byte, error) {
-	url := fmt.Sprintf("https://api.flickr.com/services/rest/?method=flickr.%s&api_key=%s&format=json&nojsoncallback=1", method, client.Key)
-	if len(client.Token) > 0 {
-		url = fmt.Sprintf("%s&auth_token=%s", url, client.Token)
+func (c *Client) Request(method string, params Params) ([]byte, error) {
+	url := fmt.Sprintf("%s/?method=flickr.%s&api_key=%s&format=json&nojsoncallback=1", c.URL, method, c.Key)
+	if len(c.Token) > 0 {
+		url = fmt.Sprintf("%s&auth_token=%s", url, c.Token)
 	}
 
-	if len(client.Sig) > 0 {
-		url = fmt.Sprintf("%s&auth_sig=%s", url, client.Sig)
+	if len(c.Sig) > 0 {
+		url = fmt.Sprintf("%s&auth_sig=%s", url, c.Sig)
 	}
 
 	for key, value := range params {
