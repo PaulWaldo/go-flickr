@@ -3,11 +3,7 @@ package flickr
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
-	"os"
-
-	"github.com/joho/godotenv"
 )
 
 type Params map[string]string
@@ -31,27 +27,21 @@ func NewClient() (*Client, error) {
 // attempting fo fetch the API Key first from an environment file specified in envFileName
 // then from the file ./.env
 func NewClientEnvFile(envFileName string) (*Client, error) {
-	/* Check specified env file */
-	if envFileName != "" {
-		err := godotenv.Load(envFileName)
-		if err != nil {
-			log.Fatalf("Error loading env file %s", envFileName)
-		}
-	} else {
-		/* Check for ./.env file */
-		godotenv.Load()
+	key, err := GetApiKey("", envFileName)
+	if err != nil {
+		return nil, err
 	}
-
-	return NewClientEnvVar()
+	return &Client{Key: key}, nil
 }
 
 // NewClientEnvFile creates a client that can access the Flickr API,
 // by searching for an environment variable named by ApiKeyEnvVar
 func NewClientEnvVar() (*Client, error) {
-	if key, ok := os.LookupEnv(ApiKeyEnvVar); ok {
-		return &Client{Key: key}, nil
+	key, err := GetApiKey(ApiKeyEnvVar, "")
+	if err != nil {
+		return nil, err
 	}
-	return nil, fmt.Errorf("API Key '%s' not found in environment", ApiKeyEnvVar)
+	return &Client{Key: key}, nil
 }
 
 func (client *Client) Request(method string, params Params) ([]byte, error) {
