@@ -1,7 +1,9 @@
+//go:build integration
+// +build integration
+
 package flickr
 
 import (
-	"fmt"
 	"testing"
 )
 
@@ -17,9 +19,6 @@ func TestAlbum(t *testing.T) {
 		t.Fatalf(err.Error())
 	}
 
-	fmt.Println(album.Id)
-	fmt.Println(len(album.Photos))
-
 	if len(album.Id) == 0 {
 		t.Fatalf("album id is empty")
 	}
@@ -31,6 +30,4 @@ func TestAlbum(t *testing.T) {
 	if len(album.Photos[0].Id) == 0 {
 		t.Fatalf("First photo id is empty")
 	}
-
-	fmt.Println(album.Photos[0].URLs()["large"])
 }
