@@ -12,10 +12,11 @@ import (
 )
 
 func TestFavsFirstPage(t *testing.T) {
-	client, err := NewPhotosClient()
+	client, err := NewPhotosClientEnvVar(PaginationParams{})
 	if err != nil {
 		t.Fatalf("Unable to create client: %s", err)
 	}
+	client.Key = "XXX"
 
 	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		var sampleResp = []byte(`{

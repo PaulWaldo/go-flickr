@@ -26,11 +26,16 @@ func NewClient() (*Client, error) {
 	return NewClientEnvFile("")
 }
 
+// NewClientApiKey creates a client that can access the Flickr API using the supplied API Key
+func NewClientApiKey(apiKey string) Client {
+	return Client{Key: apiKey, URL: flickrURL}
+}
+
 // NewClientEnvFile creates a client that can access the Flickr API,
 // attempting fo fetch the API Key first from an environment file specified in envFileName
 // then from the file ./.env
 func NewClientEnvFile(envFileName string) (*Client, error) {
-	key, err := GetApiKey("", envFileName)
+	key, err := getApiKey("", envFileName)
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +45,7 @@ func NewClientEnvFile(envFileName string) (*Client, error) {
 // NewClientEnvFile creates a client that can access the Flickr API,
 // by searching for an environment variable named by ApiKeyEnvVar
 func NewClientEnvVar() (*Client, error) {
-	key, err := GetApiKey(ApiKeyEnvVar, "")
+	key, err := getApiKey(ApiKeyEnvVar, "")
 	if err != nil {
 		return nil, err
 	}

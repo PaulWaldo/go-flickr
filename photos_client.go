@@ -104,7 +104,7 @@ type PhotosClient struct {
 
 // NewPhotosClientEnvVar creates a paginated client that can access the Flickr API,
 // by searching for an environment variable named by ApiKeyEnvVar
-func NewPhotosClientEnvVar(string, paginationParams PaginationParams) (*PhotosClient, error) {
+func NewPhotosClientEnvVar(paginationParams PaginationParams) (*PhotosClient, error) {
 	client, err := NewClientEnvVar()
 	if err != nil {
 		return nil, err
@@ -141,6 +141,15 @@ func NewPhotosClient() (*PhotosClient, error) {
 		PaginationParams: &PaginationParams{PerPage: 100, Page: 1},
 	}, nil
 }
+
+func NewPhotosClientApiKey(apiKey string) PhotosClient {
+	client := NewClientApiKey(apiKey)
+	return PhotosClient{
+		Client:           &client,
+		PaginationParams: &PaginationParams{PerPage: 100, Page: 1},
+	}
+}
+
 func convert(r photoListRaw) *PhotoList {
 	x := &PhotoList{}
 	x.Page = r.Photos.Page
