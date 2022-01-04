@@ -27,8 +27,8 @@ func NewClient() (*Client, error) {
 }
 
 // NewClientApiKey creates a client that can access the Flickr API using the supplied API Key
-func NewClientApiKey(apiKey string) Client {
-	return Client{Key: apiKey, URL: flickrURL}
+func NewClientApiKey(apiKey string) *Client {
+	return &Client{Key: apiKey, URL: flickrURL}
 }
 
 // NewClientEnvFile creates a client that can access the Flickr API,

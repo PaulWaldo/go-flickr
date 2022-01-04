@@ -142,10 +142,10 @@ func NewPhotosClient() (*PhotosClient, error) {
 	}, nil
 }
 
-func NewPhotosClientApiKey(apiKey string) PhotosClient {
+func NewPhotosClientApiKey(apiKey string) *PhotosClient {
 	client := NewClientApiKey(apiKey)
-	return PhotosClient{
-		Client:           &client,
+	return &PhotosClient{
+		Client:           client,
 		PaginationParams: &PaginationParams{PerPage: 100, Page: 1},
 	}
 }
