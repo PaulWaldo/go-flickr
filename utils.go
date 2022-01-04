@@ -35,7 +35,6 @@ func getApiKey(key, envFileName string) (string, error) {
 		}
 	}
 	if key, ok := os.LookupEnv(ApiKeyEnvVar); ok {
-		fmt.Printf("Got key %s\n", key)
 		return key, nil
 	}
 	fmt.Println("No key!!")
